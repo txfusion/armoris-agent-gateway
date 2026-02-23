@@ -1,6 +1,6 @@
 {
   "name": "armoris-agent-buyer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Core SDK for the Armoris Agent Gateway, enabling AI Agents to checkout over the x402 Protocol.",
   "type": "module",
   "main": "dist/index.js",

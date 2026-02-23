@@ -49,18 +49,11 @@ jobs:
         working-directory: armoris-agent-buyer
         run: echo "VERSION=$(node -p 'require(\"./package.json\").version')" >> $GITHUB_OUTPUT
 
-      - name: Create release branch
-        run: |
-          BRANCH="release/v${{ steps.version.outputs.VERSION }}"
-          git checkout -b "$BRANCH"
-          git add -A
-          git commit -m "chore: bump version to v${{ steps.version.outputs.VERSION }}"
-          git push origin "$BRANCH"
-
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
           branch: release/v${{ steps.version.outputs.VERSION }}
+          commit-message: "chore: bump version to v${{ steps.version.outputs.VERSION }}"
           title: "release: v${{ steps.version.outputs.VERSION }}"
           body: |
             ## Release v${{ steps.version.outputs.VERSION }}

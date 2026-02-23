@@ -1,0 +1,48 @@
+{
+    "name": "n8n-nodes-armoris-buyer",
+    "version": "0.1.0",
+    "description": "n8n node to programmatically purchase items from an Armoris Gateway using the x402 protocol.",
+    "main": "index.js",
+    "scripts": {
+        "build": "tsc && gulp build:icons",
+        "dev": "tsc --watch",
+        "format": "prettier nodes credentials --write",
+        "lint": "eslint nodes credentials package.json",
+        "lintfix": "eslint nodes credentials package.json --fix",
+        "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js modules"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/txfusion/armoris-agent-gateway.git"
+    },
+    "keywords": [
+        "n8n-community-node-package",
+        "armoris",
+        "x402",
+        "agent"
+    ],
+    "author": "txFusion",
+    "license": "MIT",
+    "files": [
+        "dist"
+    ],
+    "n8n": {
+        "n8nNodesApiVersion": 1,
+        "credentials": [
+            "dist/credentials/ArmorisApi.credentials.js"
+        ],
+        "nodes": [
+            "dist/nodes/ArmorisBuyer/ArmorisBuyer.node.js"
+        ]
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.0",
+        "gulp": "^4.0.2",
+        "n8n-workflow": "^1.42.0",
+        "n8n-core": "^1.42.0",
+        "typescript": "^5.3.3"
+    },
+    "dependencies": {
+        "armoris-agent-buyer": "file:../armoris-agent-buyer"
+    }
+}

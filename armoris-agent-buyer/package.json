@@ -1,0 +1,36 @@
+{
+  "name": "armoris-agent-buyer",
+  "version": "1.0.0",
+  "description": "Core SDK for the Armoris Agent Gateway, enabling AI Agents to checkout over the x402 Protocol.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/txfusion/armoris-agent-gateway.git"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "commerce",
+    "x402",
+    "txfusion",
+    "purchase"
+  ],
+  "author": "txFusion",
+  "license": "MIT",
+  "dependencies": {
+    "@x402/core": "^2.4.0",
+    "@x402/evm": "^2.4.0",
+    "dotenv": "^17.3.1",
+    "viem": "^2.46.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  }
+}

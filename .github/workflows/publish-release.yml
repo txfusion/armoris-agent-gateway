@@ -1,0 +1,82 @@
+name: Publish Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Read version
+        id: version
+        working-directory: armoris-agent-buyer
+        run: echo "VERSION=$(node -p 'require(\"./package.json\").version')" >> $GITHUB_OUTPUT
+
+      - name: Install & Build armoris-agent-buyer
+        working-directory: armoris-agent-buyer
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install & Build n8n-nodes-armoris-buyer
+        working-directory: n8n-nodes-armoris-buyer
+        run: |
+          npm ci
+          npm run build
+
+      - name: Package armoris-agent-buyer
+        working-directory: armoris-agent-buyer
+        run: npm pack
+
+      - name: Package n8n-nodes-armoris-buyer
+        working-directory: n8n-nodes-armoris-buyer
+        run: npm pack
+
+      # --- Publish to npm ---
+      - name: Publish armoris-agent-buyer to npm
+        working-directory: armoris-agent-buyer
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish n8n-nodes-armoris-buyer to npm
+        working-directory: n8n-nodes-armoris-buyer
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # --- Create git tag and GitHub Release ---
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create and push tag
+        run: |
+          git tag -a "v${{ steps.version.outputs.VERSION }}" -m "v${{ steps.version.outputs.VERSION }}"
+          git push origin "v${{ steps.version.outputs.VERSION }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: v${{ steps.version.outputs.VERSION }}
+          generate_release_notes: true
+          files: |
+            armoris-agent-buyer/*.tgz
+            n8n-nodes-armoris-buyer/*.tgz

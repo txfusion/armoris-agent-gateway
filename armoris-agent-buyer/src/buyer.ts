@@ -21,13 +21,25 @@ export class ArmorisBuyer {
         }
         this.evmSigner = privateKeyToAccount(config.privateKey);
 
-        // Map networkId to viem Chain
         if (config.networkId === 324705682) { // Skale Testnet
             if (!config.rpcUrl) throw new Error("rpcUrl is required for Skale Testnet");
             this.chain = defineChain({
                 id: 324705682,
                 name: 'Skale Base Sepolia Testnet',
                 network: 'skale-base-sepolia',
+                nativeCurrency: { decimals: 18, name: 'sFUEL', symbol: 'sFUEL' },
+                rpcUrls: {
+                    default: { http: [config.rpcUrl] },
+                    public: { http: [config.rpcUrl] },
+                },
+            });
+            this.rpcUrl = config.rpcUrl;
+        } else if (config.networkId === 1187947933) { // Skale Mainnet
+            if (!config.rpcUrl) throw new Error("rpcUrl is required for SKALE Mainnet");
+            this.chain = defineChain({
+                id: 1187947933,
+                name: 'SKALE Base Mainnet',
+                network: 'skale-base',
                 nativeCurrency: { decimals: 18, name: 'sFUEL', symbol: 'sFUEL' },
                 rpcUrls: {
                     default: { http: [config.rpcUrl] },

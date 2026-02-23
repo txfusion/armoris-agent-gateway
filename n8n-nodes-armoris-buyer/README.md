@@ -1,64 +1,84 @@
 # n8n-nodes-armoris-buyer
 
-This is a native [n8n](https://n8n.io/) custom node that enables AI agents to autonomously purchase items from Armoris x402-enabled stores (e.g., WooCommerce).
+Native [n8n](https://n8n.io/) community node for AI agents to purchase items from WooCommerce stores using the [x402 payment protocol](https://www.x402.org/).
+
+[![npm](https://img.shields.io/npm/v/n8n-nodes-armoris-buyer)](https://www.npmjs.com/package/n8n-nodes-armoris-buyer)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ## Features
-- **Auto-Discovery**: Provide the URL of the merchant's store, and the node automatically parses the `<meta>` tags to discover the Gateway URL, Store ID, and necessary Context Data to construct the transaction.
-- **x402 Protocol Native**: Seamlessly leverages the `@x402/core` and `armoris-agent-buyer` SDKs to request quotes, perform EIP-712/Permit2 signatures, and submit the final payment proofs to the WooCommerce plugin.
-- **Secure Credentials**: Uses n8n's encrypted credential vault to store the Agent's EVM Private Key, RPC URL, and Network IDs.
 
-## Installation Methods
+- **Auto-Discovery** — Provide a store URL, the node scrapes `<meta>` tags to find the Gateway URL and Store ID automatically
+- **x402 Native** — Handles quote requests, EIP-712 payment signatures, and order submission under the hood
+- **Secure Credentials** — Agent private keys are stored in n8n's encrypted credential vault
+- **Dynamic Inputs** — All fields support n8n expressions, so upstream AI agents can inject URLs and items at runtime
 
-### Method 1: Installing into a Local n8n Instance (Quickstart)
+## Installation
 
-If you are running n8n locally via `npm run start`:
+### Via n8n UI (Recommended)
+1. Go to **Settings → Community Nodes → Install**
+2. Search for `n8n-nodes-armoris-buyer`
+3. Click **Install**
 
-1. Build this package:
-   ```bash
-   cd packages/n8n-nodes-armoris-buyer
-   npm install
-   npm run build
-   ```
-2. Navigate to your n8n custom extension directory (usually `~/.n8n/custom/`)
-   ```bash
-   mkdir -p ~/.n8n/custom
-   cd ~/.n8n/custom
-   ```
-3. Initialize a basic `package.json` if it doesn't exist (`npm init -y`) and install the local package:
-   ```bash
-   npm install /path/to/txfusion/agent-gateway/packages/n8n-nodes-armoris-buyer
-   ```
-4. Restart your n8n instance.
-
-### Method 2: Docker / Production Deployments
-In a Docker environment, map this folder or `npm install` it directly in your `Dockerfile`:
+### Via Docker
 ```dockerfile
 FROM n8nio/n8n:latest
 USER root
-# Example of installing from source inside Docker
-COPY ./packages/n8n-nodes-armoris-buyer /usr/local/lib/n8n/n8n-nodes-armoris-buyer
-RUN cd /usr/local/lib/n8n/n8n-nodes-armoris-buyer && npm install && npm run build
-RUN cd /usr/local/lib/node_modules/n8n && npm install /usr/local/lib/n8n/n8n-nodes-armoris-buyer
+COPY ./armoris-agent-buyer /usr/local/lib/n8n/armoris-agent-buyer
+COPY ./n8n-nodes-armoris-buyer /usr/local/lib/n8n/n8n-nodes-armoris-buyer
+RUN cd /usr/local/lib/n8n/armoris-agent-buyer && npm install --include=dev && npm run build
+RUN cd /usr/local/lib/n8n/n8n-nodes-armoris-buyer && npm install --include=dev && npm run build
+RUN mkdir -p /usr/local/lib/n8n/custom && cd /usr/local/lib/n8n/custom && npm init -y && \
+    npm install /usr/local/lib/n8n/n8n-nodes-armoris-buyer /usr/local/lib/n8n/armoris-agent-buyer
 USER node
 ```
 
-## Setup & Usage
+Set `N8N_CUSTOM_EXTENSIONS=/usr/local/lib/n8n/custom` in your environment.
+
+## Usage
 
 ### 1. Configure Credentials
-1. In n8n, create a new **Credential** and search for `Armoris Agent API`.
-2. Input the Agent's EVM Private Key (`0x...`).
-3. Set the Network ID (e.g., `31337` for Local Hardhat, `324705682` for Skale Testnet).
-4. Save the credential.
+1. In n8n, create a new **Armoris Agent API** credential
+2. Enter the Agent's EVM private key (`0x...`)
+3. Set the Network ID (e.g., `31337` for local, `324705682` for Skale Testnet)
+4. Set the RPC URL
 
-### 2. Add the Node to a Workflow
-1. Add the **Armoris Purchase Agent** node to your canvas.
-2. Select your configured `Armoris Agent API` credential.
-3. Pass the **Shop URL** dynamically from an expression or via an earlier node (e.g., `$json.shopUrl`).
-4. Define the items you wish to purchase (`[{ "sku": "product_123", "quantity": 1 }]`).
-5. Execute the Workflow!
+### 2. Add the Node
+1. Add **Armoris Purchase Agent** to your workflow canvas
+2. Select your credential
+3. Set the **Shop URL** — the WooCommerce product page URL (e.g., `https://store.com/product/sneakers`)
+4. Set the **Items** — JSON array of `[{ "sku": "product-123", "quantity": 1 }]`
+5. Execute!
+
+### Dynamic Inputs from AI Agents
+
+All fields support n8n expressions. Wire an upstream AI agent's output directly:
+
+- **Shop URL**: `{{ $json.shopUrl }}`
+- **Items**: `{{ JSON.stringify($json.items) }}`
+
+```
+[AI Agent] → [IF: x402 supported?] → [Armoris Buyer] → [Response]
+                                   ↘ [Stripe Node]    → [Response]
+```
+
+## Node Reference
+
+| Field | Type | Description |
+|-------|------|-------------|
+| Shop URL | `string` | WooCommerce product or shop page URL |
+| Items | `json` | Array of `{ sku, quantity }` objects |
+| Customer Email | `string` | Buyer email (default: `agent@armoris.ai`) |
+| Customer First Name | `string` | (default: `AI`) |
+| Customer Last Name | `string` | (default: `Agent`) |
 
 ## Development
 
-To make changes to the node logic:
-1. Run `npm run dev` to watch for local changes.
-2. Restart n8n to ensure the updated javascript is reloaded.
+```bash
+npm install
+npm run dev    # Watch mode
+npm run build  # Production build
+```
+
+## License
+
+MIT © [txFusion](https://txfusion.io)

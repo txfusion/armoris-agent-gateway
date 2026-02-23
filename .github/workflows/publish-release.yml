@@ -50,16 +50,17 @@ jobs:
         run: npm pack
 
       # --- Publish to npm ---
-      - name: Setup npm registry token
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-
       - name: Publish armoris-agent-buyer to npm
         working-directory: armoris-agent-buyer
         run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish n8n-nodes-armoris-buyer to npm
         working-directory: n8n-nodes-armoris-buyer
         run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # --- Create git tag and GitHub Release ---
       - name: Configure Git

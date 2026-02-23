@@ -25,7 +25,9 @@ jobs:
       - name: Read version
         id: version
         working-directory: armoris-agent-buyer
-        run: echo "VERSION=$(node -p 'require(\"./package.json\").version')" >> $GITHUB_OUTPUT
+        run: |
+          VERSION=$(node -e "console.log(require('./package.json').version)")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Install & Build armoris-agent-buyer
         working-directory: armoris-agent-buyer
@@ -48,17 +50,16 @@ jobs:
         run: npm pack
 
       # --- Publish to npm ---
+      - name: Setup npm registry token
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
       - name: Publish armoris-agent-buyer to npm
         working-directory: armoris-agent-buyer
         run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish n8n-nodes-armoris-buyer to npm
         working-directory: n8n-nodes-armoris-buyer
         run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # --- Create git tag and GitHub Release ---
       - name: Configure Git

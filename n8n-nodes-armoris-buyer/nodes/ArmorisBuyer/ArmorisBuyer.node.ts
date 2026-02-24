@@ -40,16 +40,26 @@ export class ArmorisBuyer implements INodeType {
                 displayName: 'Items to Purchase',
                 name: 'items',
                 type: 'json',
-                default: '[{ "sku": "product-123", "quantity": 1 }]',
+                default: '[{ "sku": "1", "quantity": 1, "attributes": { "color": "black", "size": "42" } }]',
                 required: true,
-                description: 'JSON Array of items to buy (requires "sku" and "quantity").',
+                description: 'JSON Array of items to buy (requires "sku", "quantity" and optional "attributes" object for variable products).',
             },
             {
                 displayName: 'Customer details',
                 name: 'customer',
                 type: 'collection',
                 placeholder: 'Add Details',
-                default: {},
+                default: JSON.stringify({
+                    email: 'bob@email.com',
+                    firstName: 'bob',
+                    lastName: 'clark',
+                    address1: '123 Node St',
+                    city: 'LA',
+                    country: 'US',
+                    state: 'CA',
+                    postcode: '90210',
+                    phone: '1234567890'
+                }),
                 options: [
                     {
                         displayName: 'Email',
@@ -69,7 +79,42 @@ export class ArmorisBuyer implements INodeType {
                         type: 'string',
                         default: 'Agent',
                     },
-                    // Can expand fields here as needed
+                    {
+                        displayName: 'Address 1',
+                        name: 'address1',
+                        type: 'string',
+                        default: '123 Node St',
+                    },
+                    {
+                        displayName: 'City',
+                        name: 'city',
+                        type: 'string',
+                        default: 'Automation',
+                    },
+                    {
+                        displayName: 'Country',
+                        name: 'country',
+                        type: 'string',
+                        default: 'US',
+                    },
+                    {
+                        displayName: 'State',
+                        name: 'state',
+                        type: 'string',
+                        default: 'CA',
+                    },
+                    {
+                        displayName: 'Postcode',
+                        name: 'postcode',
+                        type: 'string',
+                        default: '90210',
+                    },
+                    {
+                        displayName: 'Phone',
+                        name: 'phone',
+                        type: 'string',
+                        default: '1234567890',
+                    },
                 ],
             },
         ],
@@ -95,15 +140,15 @@ export class ArmorisBuyer implements INodeType {
 
                 let customerProps = this.getNodeParameter('customer', i) as any;
                 const customerDetails = {
-                    email: customerProps.email || 'agent@armoris.ai',
-                    firstName: customerProps.firstName || 'Armoris',
-                    lastName: customerProps.lastName || 'Agent',
-                    address1: '123 Node St',
-                    city: 'Automation',
-                    country: 'US',
-                    state: 'CA',
-                    postcode: '90210',
-                    phone: '1234567890'
+                    email: customerProps.email,
+                    firstName: customerProps.firstName,
+                    lastName: customerProps.lastName,
+                    address1: customerProps.address1,
+                    city: customerProps.city,
+                    country: customerProps.country,
+                    state: customerProps.state,
+                    postcode: customerProps.postcode,
+                    phone: customerProps.phone
                 };
 
                 // 1. Discover Configuration

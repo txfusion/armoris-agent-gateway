@@ -128,7 +128,7 @@ export class ArmorisBuyer implements INodeType {
             try {
                 const credentials = await this.getCredentials('armorisApi');
                 const shopUrl = this.getNodeParameter('shopUrl', i) as string;
-                let rawItems = this.getNodeParameter('items', i);
+                const rawItems = this.getNodeParameter('items', i);
                 let purchaseItems: { sku: string, quantity: number }[] = [];
                 if (typeof rawItems === 'string') {
                     purchaseItems = JSON.parse(rawItems);
@@ -138,7 +138,7 @@ export class ArmorisBuyer implements INodeType {
                     throw new Error("Items must be a JSON array");
                 }
 
-                let customerProps = this.getNodeParameter('customer', i) as any;
+                const customerProps = this.getNodeParameter('customer', i) as any;
                 const customerDetails = {
                     email: customerProps.email,
                     firstName: customerProps.firstName,

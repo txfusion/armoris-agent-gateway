@@ -33,13 +33,13 @@ jobs:
       - name: Install & Build armoris-agent-buyer
         working-directory: armoris-agent-buyer
         run: |
-          npm ci
+          npm install
           npm run build
 
       - name: Install & Build n8n-nodes-armoris-buyer
         working-directory: n8n-nodes-armoris-buyer
         run: |
-          npm ci
+          npm install
           npm run build
 
       - name: Package armoris-agent-buyer

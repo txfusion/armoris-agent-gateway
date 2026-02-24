@@ -112,10 +112,22 @@ export class ArmorisBuyer {
      * Executes the full purchase flow against an Armoris Gateway
      */
     async buy(request: PurchaseRequest): Promise<PurchaseResult> {
-        const quoteUrl = `${this.config.gatewayUrl}/proxy/quote/${this.config.storeId}`;
+        const contextUrl = `${this.config.gatewayUrl}/proxy/context/${this.config.storeId}`;
 
         try {
-            // 1. Request Quote
+            // 1. Fetch Context for Dynamic Endpoints
+            let contextResponse = await fetch(contextUrl);
+            if (!contextResponse.ok) {
+                return { success: false, error: `Failed to fetch store context (${contextResponse.status})` };
+            }
+            const contextData = await contextResponse.json();
+            const quoteUrl = contextData.endpoints?.quote?.url;
+
+            if (!quoteUrl) {
+                return { success: false, error: `Quote endpoint not found in store context` };
+            }
+
+            // 2. Request Quote
             // console.debug(`[Armoris] Requesting quote from: ${quoteUrl}`);
             let response = await fetch(quoteUrl, {
                 method: 'POST',
@@ -159,7 +171,8 @@ export class ArmorisBuyer {
                 const paymentPayload = await client.createPaymentPayload(paymentRequired);
                 const paymentHeader = encodePaymentSignatureHeader(paymentPayload);
 
-                const paymentUrl = this.config.gatewayUrl + paymentRequired.resource.url;
+                // Use payment url from context endpoints if available, otherwise fallback to resource.url concat
+                const paymentUrl = contextData.endpoints?.payment?.url || (this.config.gatewayUrl + paymentRequired.resource.url);
 
                 // 5. Submit Final Order
                 // console.debug(`[Armoris] Submitting final order to: ${paymentUrl}`);

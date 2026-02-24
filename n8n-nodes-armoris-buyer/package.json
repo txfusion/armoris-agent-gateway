@@ -47,6 +47,6 @@
         "typescript": "^5.3.3"
     },
     "dependencies": {
-        "armoris-agent-buyer": "file:../armoris-agent-buyer"
+        "armoris-agent-buyer": "^0.1.2"
     }
 }

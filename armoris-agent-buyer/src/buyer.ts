@@ -117,14 +117,20 @@ export class ArmorisBuyer {
         try {
             // 1. Fetch Context for Dynamic Endpoints
             let contextResponse = await fetch(contextUrl);
+
             if (!contextResponse.ok) {
                 return { success: false, error: `Failed to fetch store context (${contextResponse.status})` };
             }
             const contextData = await contextResponse.json();
-            const quoteUrl = contextData.endpoints?.quote?.url;
+            let quoteUrl = contextData.endpoints?.quote?.url;
 
             if (!quoteUrl) {
                 return { success: false, error: `Quote endpoint not found in store context` };
+            }
+
+            if (process.env.N8N_HOST || process.env.DOCKER_HOST_ALIAS) {
+                const alias = process.env.DOCKER_HOST_ALIAS || 'host.docker.internal';
+                quoteUrl = quoteUrl.replace('localhost', alias).replace('127.0.0.1', alias);
             }
 
             // 2. Request Quote
@@ -172,7 +178,12 @@ export class ArmorisBuyer {
                 const paymentHeader = encodePaymentSignatureHeader(paymentPayload);
 
                 // Use payment url from context endpoints if available, otherwise fallback to resource.url concat
-                const paymentUrl = contextData.endpoints?.payment?.url || (this.config.gatewayUrl + paymentRequired.resource.url);
+                let paymentUrl = contextData.endpoints?.payment?.url || (this.config.gatewayUrl + paymentRequired.resource.url);
+
+                if (process.env.N8N_HOST || process.env.DOCKER_HOST_ALIAS) {
+                    const alias = process.env.DOCKER_HOST_ALIAS || 'host.docker.internal';
+                    paymentUrl = paymentUrl.replace('localhost', alias).replace('127.0.0.1', alias);
+                }
 
                 // 5. Submit Final Order
                 // console.debug(`[Armoris] Submitting final order to: ${paymentUrl}`);
@@ -230,13 +241,6 @@ export interface StoreContext {
  * Looks for <meta name="x402:..." /> tags injected by the armoris plugin.
  */
 export async function discoverStore(shopUrl: string, fetchContextData: boolean = true): Promise<StoreContext> {
-    // Docker networking fix: If running inside n8n or a docker container, 
-    // localhost will fail to resolve the host machine.
-    if (process.env.N8N_HOST || process.env.DOCKER_HOST_ALIAS) {
-        const alias = process.env.DOCKER_HOST_ALIAS || 'host.docker.internal';
-        shopUrl = shopUrl.replace('localhost', alias).replace('127.0.0.1', alias);
-    }
-
     // console.debug(`[Armoris] Discovering store configuration from: ${shopUrl}`);
     let response: Response;
     try {
@@ -246,7 +250,7 @@ export async function discoverStore(shopUrl: string, fetchContextData: boolean =
     }
 
     if (!response.ok) {
-        throw new Error(`Failed to fetch shop url: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to fetch shop url: ${shopUrl} ${response.status} ${response.statusText}`);
     }
 
     const html = await response.text();

@@ -45,77 +45,67 @@ export class ArmorisBuyer implements INodeType {
                 description: 'JSON Array of items to buy (requires "sku", "quantity" and optional "attributes" object for variable products).',
             },
             {
-                displayName: 'Customer details',
-                name: 'customer',
-                type: 'collection',
-                placeholder: 'Add Details',
-                default: JSON.stringify({
-                    email: 'bob@email.com',
-                    firstName: 'bob',
-                    lastName: 'clark',
-                    address1: '123 Node St',
-                    city: 'LA',
-                    country: 'US',
-                    state: 'CA',
-                    postcode: '90210',
-                    phone: '1234567890'
-                }),
-                options: [
-                    {
-                        displayName: 'Email',
-                        name: 'email',
-                        type: 'string',
-                        default: 'agent@armoris.ai',
-                    },
-                    {
-                        displayName: 'First Name',
-                        name: 'firstName',
-                        type: 'string',
-                        default: 'AI',
-                    },
-                    {
-                        displayName: 'Last Name',
-                        name: 'lastName',
-                        type: 'string',
-                        default: 'Agent',
-                    },
-                    {
-                        displayName: 'Address 1',
-                        name: 'address1',
-                        type: 'string',
-                        default: '123 Node St',
-                    },
-                    {
-                        displayName: 'City',
-                        name: 'city',
-                        type: 'string',
-                        default: 'Automation',
-                    },
-                    {
-                        displayName: 'Country',
-                        name: 'country',
-                        type: 'string',
-                        default: 'US',
-                    },
-                    {
-                        displayName: 'State',
-                        name: 'state',
-                        type: 'string',
-                        default: 'CA',
-                    },
-                    {
-                        displayName: 'Postcode',
-                        name: 'postcode',
-                        type: 'string',
-                        default: '90210',
-                    },
-                    {
-                        displayName: 'Phone',
-                        name: 'phone',
-                        type: 'string',
-                        default: '1234567890',
-                    },
-                ],
+                displayName: 'Customer Email',
+                name: 'customerEmail',
+                type: 'string',
+                default: 'agent@armoris.ai',
+                required: true,
+            },
+            {
+                displayName: 'Customer First Name',
+                name: 'customerFirstName',
+                type: 'string',
+                default: 'AI',
+                required: true,
+            },
+            {
+                displayName: 'Customer Last Name',
+                name: 'customerLastName',
+                type: 'string',
+                default: 'Agent',
+                required: true,
+            },
+            {
+                displayName: 'Customer Address',
+                name: 'customerAddress1',
+                type: 'string',
+                default: '123 Node St',
+                required: true,
+            },
+            {
+                displayName: 'Customer City',
+                name: 'customerCity',
+                type: 'string',
+                default: 'Automation',
+                required: true,
+            },
+            {
+                displayName: 'Customer Country',
+                name: 'customerCountry',
+                type: 'string',
+                default: 'US',
+                required: true,
+            },
+            {
+                displayName: 'Customer State',
+                name: 'customerState',
+                type: 'string',
+                default: 'CA',
+                required: true,
+            },
+            {
+                displayName: 'Customer Postcode',
+                name: 'customerPostcode',
+                type: 'string',
+                default: '90210',
+                required: true,
+            },
+            {
+                displayName: 'Customer Phone',
+                name: 'customerPhone',
+                type: 'string',
+                default: '1234567890',
+                required: true,
             },
         ],
     };
@@ -138,17 +128,16 @@ export class ArmorisBuyer implements INodeType {
                     throw new Error("Items must be a JSON array");
                 }
 
-                const customerProps = this.getNodeParameter('customer', i) as any;
                 const customerDetails = {
-                    email: customerProps.email,
-                    firstName: customerProps.firstName,
-                    lastName: customerProps.lastName,
-                    address1: customerProps.address1,
-                    city: customerProps.city,
-                    country: customerProps.country,
-                    state: customerProps.state,
-                    postcode: customerProps.postcode,
-                    phone: customerProps.phone
+                    email: this.getNodeParameter('customerEmail', i) as string,
+                    firstName: this.getNodeParameter('customerFirstName', i) as string,
+                    lastName: this.getNodeParameter('customerLastName', i) as string,
+                    address1: this.getNodeParameter('customerAddress1', i) as string,
+                    city: this.getNodeParameter('customerCity', i) as string,
+                    country: this.getNodeParameter('customerCountry', i) as string,
+                    state: this.getNodeParameter('customerState', i) as string,
+                    postcode: this.getNodeParameter('customerPostcode', i) as string,
+                    phone: this.getNodeParameter('customerPhone', i) as string
                 };
 
                 // 1. Discover Configuration
